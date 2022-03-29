@@ -192,19 +192,6 @@ class Solver:
 
         self.yellow_letters = []
 
-    # def add_wrong_letters(self):
-    #
-    #     # remaining letters in guess that are not green or yellow
-    #     if self.guess is not None:  # self.guess is None til the first guess
-    #         for letter in self.guess:  # iterates through self.guess
-    #             if letter not in self.yellow_letters:
-    #                 print(f"{letter} not in self.yellow_letters")
-
-                # if letter not in self.yellow_letters or letter not in self.green_letters.values():
-                #     # letter was in the guess but not a correct letter
-                #     # remove any word containing that letter
-                #     self.wrong_letters.append(letter)
-
     def save_wordlist(self):
         """for testing. saves all remaining words to new text file"""
         with open('Remaining Wordlist.txt', 'w') as file:
