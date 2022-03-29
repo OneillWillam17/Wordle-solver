@@ -105,9 +105,9 @@ class Solver:
         self.save_wordlist()
 
         # picks a word at random from remaining words
-        self.guess = choice(self.wordlist)  # todo error index here, all available words are gone
+        self.guess = choice(self.wordlist)
 
-        # todo remove after testing
+        # prints the dict, helpful to see which green letter is located where
         print(f"Green letter dict: {self.green_letters}")
 
         return self.guess
@@ -120,7 +120,7 @@ class Solver:
         for word in self.wordlist[:]:
 
             # remove any words we have already guessed previously
-            for used_word in self.already_guessed[:]:  # todo potential error here later
+            for used_word in self.already_guessed[:]:
                 print(f'used_word: {used_word}')
 
                 # so the program doesn't try to remove the word several times per loop
