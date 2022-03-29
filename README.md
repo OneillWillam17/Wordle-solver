@@ -1,5 +1,5 @@
 # wordle-solver
-First iteration at an automated wordle solver, code is pretty messy for now but i'm looking forward to revamping it and making it cleaner and more efficient!
+First iteration at an automated wordle solver, This is a BETA version but i'm looking forward to revamping it and making it cleaner and more efficient!
 
 # main.py
 For now just calls the methods from brain.py, in a later update will be used for a UI or a self sustaining version of the program (aka picking its own word at random and solving for it without user input) 
