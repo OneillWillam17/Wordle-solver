@@ -1,1 +1,1 @@
-['shall', 'shawl']
+possible solutions for the wordle get written here
