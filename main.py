@@ -12,4 +12,5 @@ for i in range(5):
 # final guess
 print(f"Final Guess: {wordle.guess_word()}")
 
-# todo potential double letters issues
+# todo potential double letters issues, index always chooses closes to front
+# todo possible fix in ui ^ able to choose where letters go?

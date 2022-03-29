@@ -24,7 +24,7 @@ class Solver:
         self.already_guessed = []
 
         # used in self.guess_word() to display any potential words the letters may show
-        self.potential_word = []
+        self.confirmed_letters = []
 
         # latest guess from self.guess_word()
         self.guess = None
@@ -50,11 +50,10 @@ class Solver:
                 print("Yay we got it!")
 
             for char in self.guess:
-
                 if char in green_input:
                     # character is in both user input and the programs guess
                     # means the character is confirmed in the correct spot within the guess
-                    index = self.guess.index(char)
+                    index = self.guess.index(char) # todo issue here for double letters
                     self.green_letters[index] = char
 
             # Yellow letters
@@ -64,8 +63,10 @@ class Solver:
                 # these letters are confirmed in the word, but not in a guaranteed spot.
                 self.yellow_letters.append(char)
 
-            # add letters from guess but not yellow to wrong_letters
+            # add letters from self.guess that weren't correct to wrong_letters
             for letter in self.guess:
+
+                # letters in self.guess that weren't added to yellow/green list; word cannot contain letter
                 if letter not in yellow_input and letter not in green_input:
                     self.wrong_letters.append(letter)
                     print(f"self.wrong_letter added: {letter}")
@@ -83,20 +84,19 @@ class Solver:
 
             if char is None:
                 pass  # We don't know the corresponding character for this location
-
             else:
-                self.potential_word += char
+                self.confirmed_letters += char
 
         if len(self.yellow_letters) > 0:
             # we know some letters but not their locations within the word
 
             for char in self.yellow_letters:
-                self.potential_word += char
+                self.confirmed_letters += char
 
         # remove duplicates in potential_word
-        self.potential_word = list(set(self.potential_word))
+        self.confirmed_letters = list(set(self.confirmed_letters))
 
-        print(f"Potential_word: {self.potential_word}")
+        print(f"Potential_word: {self.confirmed_letters}")
 
         # removes incorrect words from list
         self.update_wordlist()
@@ -123,59 +123,41 @@ class Solver:
             for used_word in self.already_guessed[:]:
                 print(f'used_word: {used_word}')
 
-                # so the program doesn't try to remove the word several times per loop
+                # so the program doesn't attempt to remove the word several times per loop
                 print(f"Removing word: {word}, reason: self.already_guessed")
                 self.already_guessed.remove(used_word)
 
                 self.wordlist.remove(used_word)
 
             for char in self.wrong_letters:
-
                 if char in word:  # word contains a letter we know isn't in the solution, remove word from list
-
-                    try:
-                        self.wordlist.remove(word)
-                        print(f"Removing word: {word}, reason: self.wrong_letters")
-                    except ValueError:
-                        pass
+                    print(f"Removing word: {word}, reason: self.wrong_letters")
+                    self.try_remove_word(word)
 
             # yellow letters
             for char in self.yellow_letters:
-
                 if char not in word:
 
                     # we remove these words since they don't contain a letter we have already confirmed in the word
-                    try:
-                        self.wordlist.remove(word)
-                        print(f"Removing word: {word}, reason: self.yellow_letters")
-                    except ValueError:  # word may have already been removed from either loop above
-                        pass
+                    print(f"Removing word: {word}, reason: self.yellow_letters")
+                    self.try_remove_word(word)
 
             # green letters
             for key, char in self.green_letters.items():
 
-                # checks characters within green_letter dict to see if they are assigned (aka not none)
+                # checks characters within green_letter dict to see if they are assigned (aka not None)
                 if char is not None:
                     # means there is a character stored in the dict
 
                     if char not in word:
                         # we remove these words since they don't contain a letter we have already confirmed in the word
-                        try:
-                            self.wordlist.remove(word)
-                            print(f"Removing word: {word}, reason: self.green_letters.items()")
-                        except ValueError:  # word may have already been removed from either loop above
-                            pass
+                        print(f"Removing word: {word}, reason: self.green_letters.items()")
+                        self.try_remove_word(word)
 
-                    for letter in word:
-
+                    for _ in word:
                         if word[key] != char:  # The word contains the letter but in the wrong location
-
-                            try:
-                                self.wordlist.remove(word)
-                                print(f"Removing word: {word}, reason: word[key] != char")
-
-                            except ValueError:
-                                pass
+                            print(f"Removing word: {word}, reason: word[key] != char")
+                            self.try_remove_word(word)
                         else:
                             pass  # word contains both the character, and in the correct location
 
@@ -196,3 +178,11 @@ class Solver:
         """for testing. saves all remaining words to new text file"""
         with open('Remaining Wordlist.txt', 'w') as file:
             file.writelines(f"{self.wordlist}\n")
+
+    def try_remove_word(self, word):
+        """Simple method that removes a word from the wordlist while also ignoring any ValueError that may occur;
+        ValueError was caused due to method trying to remove word that was no longer in the wordlist"""
+        try:
+            self.wordlist.remove(word)
+        except ValueError:
+            pass
