@@ -15,7 +15,13 @@ class Solver:
             3: None,
             4: None,
         }
-        self.yellow_letters = []
+        self.correct_letter_wrong_location = {
+            0: None,
+            1: None,
+            2: None,
+            3: None,
+            4: None,
+        }
         self.wrong_letters = []
         self.already_guessed_words = []
         self.confirmed_letters = []
@@ -52,8 +58,12 @@ class Solver:
             # Yellow letters
             yellow_input = input('Enter yellow letters: leave blank if none: ').lower()
             for char in yellow_input:
-                # these letters are confirmed in the word, but not in a guaranteed spot.
-                self.yellow_letters.append(char)
+                # these letters are confirmed in the word, but not in the spot that was tried.
+                index = self.latest_guess.index(char)
+                if self.correct_letter_wrong_location[index] is None:
+                    # replaces None with list, so we can keep track of which guesses cannot go in which location
+                    self.correct_letter_wrong_location[index] = []
+                self.correct_letter_wrong_location[index] += char
 
             # letters in self.guess that weren't added to yellow/green list; word cannot contain letter
             for letter in self.latest_guess:
@@ -67,13 +77,14 @@ class Solver:
         """Returns a word based on any green letters or yellow letters saved, if neither (ie first guess) returns
         a word from the list at random"""
         for char in self.correct_location_and_letters.values():  # we know letters AND their location within the word
-            if char is None:
-                pass                                       # We don't know the corresponding character for this location
-            else:
+            if char is not None:
                 self.confirmed_letters += char
-        if len(self.yellow_letters) > 0:                  # we know some letters but not their locations within the word
-            for char in self.yellow_letters:
-                self.confirmed_letters += char
+
+        for list_ in self.correct_letter_wrong_location.values():
+            # contains a list which holds letters that are correct but not at that index
+            if list_ is not None:
+                for char in list_:
+                    self.confirmed_letters += char
 
         self.confirmed_letters = list(set(self.confirmed_letters))  # remove duplicates within confirmed_letters
         self.update_wordlist()                                      # removes incorrect words from list
@@ -81,6 +92,7 @@ class Solver:
         self.latest_guess = choice(self.wordlist)                   # picks a word at random from remaining words
 
         print(f"Green letter dict: {self.correct_location_and_letters}")
+        print(f"Yellow letter dict: {self.correct_letter_wrong_location}")
         print(f"Confirmed_letters: {self.confirmed_letters}")       # displays list of characters found within word
 
         return self.latest_guess
@@ -105,11 +117,25 @@ class Solver:
                     print(f"Removing word: {word}, reason: self.wrong_letters")
                     self.try_remove_word(word)
 
-            # remove these words since they don't contain a letter we already know is in the word
-            for char in self.yellow_letters:
+            for key, list_ in self.correct_letter_wrong_location.items():
+                # list contains correct letters but not located at that key's location
+                if list_ is not None:
+                    for char in list_:
+                        if char not in word:
+                            print(f"Removing word: {word}, reason: self.yellow_letters; not in word")
+
+                    for _ in word:
+                        for char in list_:
+                            if word[key] == char:
+                                # contains letter at location we already know cannot be there
+                                self.try_remove_word(word)
+                                print(f"Removing word: {word}, reason: self.yellow_letters; word[key] == char")
+
+            # backup check for above statement, words not containing yellow letters were still in wordlist
+            for char in self.confirmed_letters:
                 if char not in word:
-                    print(f"Removing word: {word}, reason: self.yellow_letters")
                     self.try_remove_word(word)
+                    print(f"Removing word: {word}, Reason: Backup check for confirmed letters")
 
             for key, char in self.correct_location_and_letters.items():
                 # checks characters within correct loc and letter dict to see if they are assigned (aka not None)
@@ -122,15 +148,14 @@ class Solver:
                     for _ in word:
                         if word[key] != char:
                             # The word contains the letter but in the wrong location
-                            print(f"Removing word: {word}, reason: word[key] != char")
+                            print(f"Removing word: {word}, reason: self.green_letters; word[key] != char")
                             self.try_remove_word(word)
                         else:
                             # word contains both the character, and in the correct location
                             pass
 
     def clear_letters(self):
-        """Resets the green and yellow letter lists, called before saving new guess"""
-        self.yellow_letters = []
+        """Resets the green letter lists, called before saving new guess"""
         self.correct_location_and_letters = {
             0: None,
             1: None,
