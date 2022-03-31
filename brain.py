@@ -27,7 +27,7 @@ class Solver:
         self.confirmed_letters = []
         self.latest_guess = None
 
-    def save_letters(self):
+    def manually_input_letters(self):
         """For use in the manual version of this program, prompts the user to enter which letters from the guess are
         'green' (green letter means it is the correct letter AND its in the correct location in the word) or yellow
         (meaning correct letter but wrong location)
@@ -95,7 +95,54 @@ class Solver:
         print(f"Yellow letter dict: {self.correct_letter_wrong_location}")
         print(f"Confirmed_letters: {self.confirmed_letters}")       # displays list of characters found within word
 
-        return self.latest_guess
+        return self.latest_guess.upper()
+
+    def get_gui_letters(self, green: dict, yellow: dict):
+        """Gets green letter and yellow letter dictionary from GUI, adds corresponding letters to
+        correct_location_and_letters and correct_letter_wrong_location"""
+        # Hold letters that may be incorrect, but still have not been run through the dict
+        possible_wrong_letters = []
+
+        print(f"Green dict from gui: {green}")
+        print(f"Yellow dict from gui: {yellow}")
+
+        # check if any of the values in the green or yellow dictionary are True
+        # if so then there is a letter at that location that we need to add to its respective dict
+        for key, boolean in enumerate(green.values()):
+            if boolean is True:
+                # means there is a green letter at that key's location
+                letter = self.latest_guess[key]
+                print(f"key/bool green letter: {letter}")
+                self.correct_location_and_letters[key] = letter
+            else:
+                # letter at this location is not a green letter
+                letter = self.latest_guess[key]
+                possible_wrong_letters += letter
+
+        for key, boolean in enumerate(yellow.values()):
+            if boolean is True:
+                # means there is a yellow character at that key's location
+                letter = self.latest_guess[key]
+                print(f"key/bool yellow letter: {letter}")
+                self.correct_letter_wrong_location[key] += letter
+            else:
+                # letter at this location is not a yellow letter
+                letter = self.latest_guess[key]
+                possible_wrong_letters += letter
+
+        # go through the characters and check if either of them are in the either of the two dictionaries.
+        for char in possible_wrong_letters[:]:
+            if char in self.correct_location_and_letters.values() or char in self.correct_letter_wrong_location.values():
+                # The letter is already known to be in the word
+                # we need to remove the character from possible wrong letters
+                possible_wrong_letters.remove(char)
+
+        print(f"Possible_wrong_letters: {possible_wrong_letters}")
+
+        # now that all letters are filtered
+        # add remaining letters to wrong_letters
+        for char in possible_wrong_letters:
+            self.wrong_letters += char
 
     def update_wordlist(self):
         """iterates through self.wordlist removes any words that don't contain letters in
@@ -148,7 +195,7 @@ class Solver:
                     for _ in word:
                         if word[key] != char:
                             # The word contains the letter but in the wrong location
-                            print(f"Removing word: {word}, reason: self.green_letters; word[key] != char")
+                            # print(f"Removing word: {word}, reason: self.green_letters; word[key] != char")
                             self.try_remove_word(word)
                         else:
                             # word contains both the character, and in the correct location
