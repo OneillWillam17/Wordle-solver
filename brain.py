@@ -52,7 +52,7 @@ class Solver:
                 if char in green_input:
                     # character is in both user input and the programs guess
                     # means the character is confirmed in the correct spot within the guess
-                    index = self.latest_guess.index(char)  # todo issue here for double letters
+                    index = self.latest_guess.index(char)
                     self.correct_location_and_letters[index] = char
 
             # Yellow letters
@@ -87,13 +87,13 @@ class Solver:
                     self.confirmed_letters += char
 
         self.confirmed_letters = list(set(self.confirmed_letters))  # remove duplicates within confirmed_letters
-        self.update_wordlist()                                      # removes incorrect words from list
-        self.save_wordlist()                                        # saves possible solutions to txt file
-        self.latest_guess = choice(self.wordlist)                   # picks a word at random from remaining words
+        self.update_wordlist()  # removes incorrect words from list
+        self.save_wordlist()  # saves possible solutions to txt file
+        self.latest_guess = choice(self.wordlist)  # picks a word at random from remaining words
 
         print(f"Green letter dict: {self.correct_location_and_letters}")
         print(f"Yellow letter dict: {self.correct_letter_wrong_location}")
-        print(f"Confirmed_letters: {self.confirmed_letters}")       # displays list of characters found within word
+        print(f"Confirmed_letters: {self.confirmed_letters}")  # displays list of characters found within word
 
         return self.latest_guess.upper()
 
@@ -120,11 +120,20 @@ class Solver:
                 possible_wrong_letters += letter
 
         for key, boolean in enumerate(yellow.values()):
+            print(f"yellow.values(): {yellow.values()}")
             if boolean is True:
                 # means there is a yellow character at that key's location
                 letter = self.latest_guess[key]
                 print(f"key/bool yellow letter: {letter}")
-                self.correct_letter_wrong_location[key] += letter
+                if self.correct_letter_wrong_location[key] is not None:
+                    # means there is already a list there to add letters to
+                    print(f"adding yellow letter to list: {letter}")
+                    self.correct_letter_wrong_location[key] += letter
+                else:
+                    # if it is None, means we have to way to store the letters for this location
+                    # need to create list
+                    print(f"creating list for yellow letter: {letter}")
+                    self.correct_letter_wrong_location[key] = [letter]
             else:
                 # letter at this location is not a yellow letter
                 letter = self.latest_guess[key]
@@ -132,12 +141,27 @@ class Solver:
 
         # go through the characters and check if either of them are in the either of the two dictionaries.
         for char in possible_wrong_letters[:]:
-            if char in self.correct_location_and_letters.values() or char in self.correct_letter_wrong_location.values():
+            if char in self.correct_location_and_letters.values():
                 # The letter is already known to be in the word
                 # we need to remove the character from possible wrong letters
-                possible_wrong_letters.remove(char)
+                try:
+                    possible_wrong_letters.remove(char)
+                # if we have a letter in a different spot within the dict, it will try to remove that letter
+                # from the possible wrong letters more than once, giving a value error
+                except ValueError:
+                    pass
+            # each item in correct letter wrong location is a list,
+            # so we have to iterate through those and check if our letter is there
+            for list_ in self.correct_letter_wrong_location.values():
+                if list_ is not None and char in list_:
+                    try:
+                        possible_wrong_letters.remove(char)
+                    # if we have a yellow letter in a different spot within the dict, it will try to remove that letter
+                    # from the possible wrong letters more than once, giving a value error
+                    except ValueError:
+                        pass
 
-        print(f"Possible_wrong_letters: {possible_wrong_letters}")
+        print(f"Possible_wrong_letters: {list(set(possible_wrong_letters))}")
 
         # now that all letters are filtered
         # add remaining letters to wrong_letters

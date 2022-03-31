@@ -118,13 +118,13 @@ class Gui:
 
     def bind_button(self, button, row):
         """Binds the single and double click inputs to changing the button colors between yellow and green"""
-        print(f"Binding button: {button}")
+        # print(f"Binding button: {button}")
         button.bind('<Button-1>', lambda x: self.change_color(event=x, button=button, row=row))
 
     def change_color(self, event, button, row):
         """Rotates button color through white, yellow, green to mark buttons"""
-        print(button.info)
-        print(row)
+        # print(button.info)
+        # print(row)
 
         if button['background'] == 'SystemButtonFace':
             button['background'] = 'yellow'
@@ -164,8 +164,6 @@ class Gui:
             # print(f"green button color: {color}")
             if color == 'green':
                 green_letter_dict[index] = True
-            else:
-                pass
 
         return green_letter_dict
 
@@ -180,14 +178,14 @@ class Gui:
             4: False,
         }
         for index, color in enumerate(self.button_color[row].values()):
+            # print(f"self.button_color yellow {self.button_color[row].values()}")
+            # print(f"yellow letter dict: {yellow_letter_dict}")
             # Check for 'yellow' in button color dictionary
-            print(f"yellow button color: {color}")
+            # print(f"yellow button color: {color}")
             if color == 'yellow':
                 yellow_letter_dict[index] = True
-            else:
-                pass
 
-            return yellow_letter_dict
+        return yellow_letter_dict
 
     def disable_buttons(self, row):
         """Disables buttons by row to prevent changing them after next word appears"""
