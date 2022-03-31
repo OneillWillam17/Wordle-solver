@@ -168,6 +168,9 @@ class Solver:
         for char in possible_wrong_letters:
             self.wrong_letters += char
 
+        # add guess to list of already_guessed words, so we don't repeat guess
+        self.already_guessed_words.append(self.latest_guess)
+
     def update_wordlist(self):
         """iterates through self.wordlist removes any words that don't contain letters in
         self.yellow_letters and self.green_letters. Also removes words that contain letters from self.wrong_letters"""
